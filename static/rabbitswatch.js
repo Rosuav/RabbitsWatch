@@ -5,6 +5,8 @@ const {TEXTAREA} = choc;
 let active = false; //True if we (appear to) have a connection, false on critical error
 ComfyJS.onChatMode = () => active = true;
 
+console.log(streamer);
+
 let channel = localStorage.getItem("rabbitswatch_channel");
 
 ComfyJS.onChat = ( user, message, flags, self, extra ) => {
