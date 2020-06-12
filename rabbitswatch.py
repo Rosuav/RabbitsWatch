@@ -2,11 +2,6 @@ import os
 import sys
 import pytz
 from pprint import pprint
-# Hack: Get gevent to do its monkeypatching as early as possible.
-# I have no idea what this is actually doing, but if you let the
-# patching happen automatically, it happens too late, and we get
-# RecursionErrors and such. There's a helpful warning on startup.
-from gevent import monkey; monkey.patch_all(subprocess=True)
 from flask import Flask, request, redirect, session, url_for, g, render_template, jsonify, Response, Markup
 from authlib.integrations.requests_client import OAuth2Session
 import requests
