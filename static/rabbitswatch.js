@@ -17,4 +17,4 @@ ComfyJS.onCommand = ( user, command, message, flags, extra ) => {
 	}
 }
 
-ComfyJS.init(streamer.login);
+ComfyJS.Init(streamer.login);
