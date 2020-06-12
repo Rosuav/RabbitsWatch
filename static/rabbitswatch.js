@@ -7,8 +7,6 @@ ComfyJS.onChatMode = () => active = true;
 
 console.log(streamer);
 
-let channel = localStorage.getItem("rabbitswatch_channel");
-
 ComfyJS.onChat = ( user, message, flags, self, extra ) => {
 	//If we haven't seen the person, add them to the list (and highlight)
 };
@@ -19,4 +17,4 @@ ComfyJS.onCommand = ( user, command, message, flags, extra ) => {
 	}
 }
 
-if (channel) ComfyJS.init(channel);
+ComfyJS.init(streamer.login);
