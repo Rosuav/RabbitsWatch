@@ -3,7 +3,6 @@ Rabbit's Watch
 
 Keep track of notes about your viewers.
 
-* Log in with Twitch (OAuth2)
 * For each viewer:
   - Allow streamer to record arbitrary notes (textarea, no semantics)
   - Allow recording of timezone
@@ -12,12 +11,10 @@ Keep track of notes about your viewers.
       hassle. JS doesn't have any facilities for tzdata and it'd be huge.
   - Show the viewers on screen when they first chat. Highlight new arrivals
     and highlight people we've never seen before.
-* Have a quick endpoint that shows the user's browser's timezone (cf Mustard)
+* Recommend that viewers go to https://rabbits-watch.herokuapp.com/tz and then
+  copy/paste the command. That'll get a reliable timezone descriptor.
 
 Requirements:
 
-* PostgreSQL database for general data retention
 * pytz unless we're going to try to go with the stdlib
-* ComfyJS front end Twitch connection for simplicity
-* Choc Factory UI
 * Python+Flask API for data management and for tz lookups
