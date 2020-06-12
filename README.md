@@ -12,6 +12,7 @@ Keep track of notes about your viewers.
       hassle. JS doesn't have any facilities for tzdata and it'd be huge.
   - Show the viewers on screen when they first chat. Highlight new arrivals
     and highlight people we've never seen before.
+* Have a quick endpoint that shows the user's browser's timezone (cf Mustard)
 
 Requirements:
 
