@@ -87,7 +87,7 @@ def authorized():
 		raise Exception
 	r = requests.get("https://api.twitch.tv/helix/users", headers={
 		"Client-ID": config.CLIENT_ID,
-		"Authorization": "Bearer " + session["twitch_token"],
+		"Authorization": "Bearer " + resp["access_token"],
 	})
 	r.raise_for_status()
 	user = r.json()["data"][0]
