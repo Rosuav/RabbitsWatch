@@ -71,7 +71,6 @@ def create_tables():
 create_tables()
 
 def ensure_user(twitchid, username, display):
-	# TODO: Save the user's OAuth info, incl Twitter.
 	with postgres, postgres.cursor() as cur:
 		cur.execute("""insert into rabbitswatch.users values (%s, %s, %s)
 			on conflict (twitchid) do update set username=excluded.username,
