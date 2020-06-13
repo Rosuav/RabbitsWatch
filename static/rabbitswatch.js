@@ -7,25 +7,42 @@ ComfyJS.onChatMode = () => active = true;
 
 console.log(streamer);
 
-async function update_viewer(data) {
-	console.log("Updating viewer:", data);
-	const result = await (await fetch("/update", {
-		credentials: "include",
-		headers: {"Content-Type": "application/json"},
-		method: "POST",
-		body: JSON.stringify(data),
-	})).json();
-	console.log("Response:", result);
+async function fetch_json(url, data) {
+	const opt = {credentials: "include"};
+	if (data) {
+		opt.method = "POST";
+		opt.body = JSON.stringify(data);
+		opt.headers = {"Content-Type": "application/json"};
+	}
+	return await (await fetch(url, opt)).json();
 }
+
+const viewernames = {};
+async function ensure_viewer(uid, displayname) {
+	if (viewernames[uid] === displayname) return;
+	//We haven't seen the person (or name has changed). Add them to
+	//the list (and highlight), or adjust.
+	console.log("Updating", uid, "to have dispname", displayname);
+	const user = await fetch_json("/update", {uid, displayname});
+	const li = DOM(`li[data-id="${uid}"]`);
+	if (!li) {
+		//Insert into beginning of UL
+	} else {
+		//Update
+	}
+}
+
 ComfyJS.onChat = ( user, message, flags, self, extra ) => {
-	//If we haven't seen the person, add them to the list (and highlight)
+	console.log("Chat:", message, extra);
+	ensure_viewer(extra.userId, extra.displayName);
 };
 
 ComfyJS.onCommand = ( user, command, message, flags, extra ) => {
 	console.log("Command:", command, extra);
+	ensure_viewer(extra.userId, extra.displayName);
 	if (command === "tz") {
 		//Record the timezone specified by the user
-		update_viewer({
+		fetch_json("/update", {
 			uid: extra.userId,
 			displayname: extra.displayName,
 			tz: message,
