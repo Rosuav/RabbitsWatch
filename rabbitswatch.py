@@ -60,6 +60,7 @@ def update():
 		for col in ("displayname", "tz", "notes")
 		if col in request.json}
 	viewer = database.update_viewer(twitchid, uid, update)
+	# TODO: Add viewer["utcoffset"] if there's a timezone
 	return jsonify(viewer)
 
 @app.route("/login")

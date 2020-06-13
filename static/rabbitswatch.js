@@ -1,6 +1,6 @@
-import choc, {set_content} from "https://rosuav.github.io/shed/chocfactory.js";
+import choc, {set_content, DOM} from "https://rosuav.github.io/shed/chocfactory.js";
 import "https://cdn.jsdelivr.net/npm/comfy.js/dist/comfy.min.js"; const ComfyJS = window.ComfyJS;
-const {TEXTAREA} = choc;
+const {B, BR, BUTTON, LI, SPAN, TEXTAREA} = choc;
 
 let active = false; //True if we (appear to) have a connection, false on critical error
 ComfyJS.onChatMode = () => active = true;
@@ -17,6 +17,13 @@ async function fetch_json(url, data) {
 	return await (await fetch(url, opt)).json();
 }
 
+function update_time(span) {
+	const tz = span.dataset.tz, utcoffset = span.dataset.utcoffset;
+	if (!tz) return set_content(span, "timezone unknown");
+	//TODO: Actually do the conversions, heh
+	return set_content(span, tz);
+}
+
 const viewernames = {};
 async function ensure_viewer(uid, displayname) {
 	if (viewernames[uid] === displayname) return;
@@ -27,8 +34,18 @@ async function ensure_viewer(uid, displayname) {
 	const li = DOM(`li[data-id="${uid}"]`);
 	if (!li) {
 		//Insert into beginning of UL
+		DOM("main > ul").prepend(LI({"data-id": uid}, [
+			B(user.displayname), " (",
+				update_time(SPAN({"data-tz": user.tz, "data-utcoffset": user.utcoffset})),
+			")", BR(),
+			TEXTAREA({rows: 4, cols: 80}, user.notes), BR(),
+			BUTTON("Save"), //TODO: onclick
+		]));
+
 	} else {
 		//Update
+		set_content(li.querySelector("b"), user.displayname);
+		update_time(li.querySelector("span"));
 	}
 }
 
