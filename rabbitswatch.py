@@ -54,7 +54,7 @@ def mainpage():
 
 @app.route("/update", methods=["POST"])
 def update():
-	pprint(request.json)
+	#pprint(request.json)
 	twitchid = session["twitch_user"]["id"]
 	uid = request.json["uid"]
 	update = {col: request.json[col]

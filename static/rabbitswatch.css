@@ -1,5 +1,20 @@
 * {box-sizing: border-box;}
 
-/* TODO: Style a dirty textarea differently */
+/* Newly-added LIs get a highlight. After a few seconds, this class is
+removed, triggering a transitional fade. */
+li {
+	transition: all 60s;
+	border: 1px solid transparent;
+	max-width: max-content;
+	margin-bottom: 1em;
+	padding: 0.5em;
+}
+li.new {
+	background-color: #efe;
+	border-color: green;
+}
 
-/* TODO: Style newly-added LIs with a fading highlight */
+/* Edited content is marked. This overrides the new highlight. */
+textarea.dirty {
+	background-color: #ffeeee !important;
+}

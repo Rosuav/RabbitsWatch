@@ -5,7 +5,7 @@ const {B, BR, BUTTON, LI, SPAN, TEXTAREA} = choc;
 let active = false; //True if we (appear to) have a connection, false on critical error
 ComfyJS.onChatMode = () => active = true;
 
-console.log(streamer);
+//console.log(streamer);
 
 async function fetch_json(url, data) {
 	const opt = {credentials: "include"};
@@ -37,9 +37,11 @@ function update_time(span) {
 
 function save_notes() {
 	const li = this.closest("li"); if (!li) return;
-	console.log("Updating notes for", li.querySelector("b").innerText);
-	fetch_json("/update", {uid: li.dataset.id, notes: li.querySelector("textarea").value});
+	const input = li.querySelector("textarea");
+	fetch_json("/update", {uid: li.dataset.id, notes: input.value})
+		.then(() => input.classList.remove("dirty"));
 }
+on("input", "textarea", e => e.match.classList.add("dirty"));
 
 const viewernames = {};
 async function ensure_viewer(uid, displayname, tz) {
@@ -47,21 +49,24 @@ async function ensure_viewer(uid, displayname, tz) {
 	viewernames[uid] = displayname;
 	//We haven't seen the person (or name has changed). Add them to
 	//the list (and highlight), or adjust.
-	console.log("Updating", uid, "to have dispname", displayname);
-	if (tz) console.log("Also setting tz to", tz);
+	//console.log("Updating", uid, "to have dispname", displayname);
+	//if (tz) console.log("Also setting tz to", tz);
 	const upd = {uid, displayname};
 	if (tz) upd.tz = tz;
 	const user = await fetch_json("/update", upd);
-	const li = DOM(`li[data-id="${uid}"]`);
+	let li = DOM(`li[data-id="${uid}"]`);
 	if (!li) {
 		//Insert into beginning of UL
-		DOM("main > ul").prepend(LI({"data-id": uid}, [
+		li = LI({"data-id": uid, className: "new"}, [
 			B(user.displayname), " (",
 				update_time(SPAN({"data-tz": user.tz, "data-utcoffset": user.utcoffset})),
 			")", BR(),
 			TEXTAREA({rows: 4, cols: 80}, user.notes), BR(),
 			BUTTON({onclick: save_notes}, "Save"),
-		]));
+		]);
+		DOM("main > ul").prepend(li);
+		//Five seconds after it got added, start fading the highlight (over sixty seconds)
+		setTimeout(() => li.classList.remove("new"), 5000);
 
 	} else {
 		//Update
@@ -73,12 +78,12 @@ async function ensure_viewer(uid, displayname, tz) {
 }
 
 ComfyJS.onChat = ( user, message, flags, self, extra ) => {
-	console.log("Chat:", message, extra);
+	//console.log("Chat:", message, extra);
 	ensure_viewer(extra.userId, extra.displayName);
 };
 
 ComfyJS.onCommand = ( user, command, message, flags, extra ) => {
-	console.log("Command:", command, extra);
+	//console.log("Command:", command, extra);
 	if (command === "tz") {
 		//Record the timezone specified by the user
 		ensure_viewer(extra.userId, extra.displayName, message);
