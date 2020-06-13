@@ -53,8 +53,14 @@ def mainpage():
 
 @app.route("/update", methods=["POST"])
 def update():
-	if err: return jsonify({"ok": False, "error": err})
-	return jsonify({"ok": True, "success": "Stream status updated.", "previous": previous})
+	pprint(request.json)
+	twitchid = session["twitch_user"]["id"]
+	uid = request.json["uid"]
+	update = {col: request.json[col]
+		for col in ("displayname", "tz", "notes")
+		if col in request.json}
+	viewer = database.update_viewer(twitchid, uid, update)
+	return jsonify(viewer)
 
 @app.route("/login")
 def login():

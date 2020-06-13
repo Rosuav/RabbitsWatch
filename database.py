@@ -21,12 +21,12 @@ TABLES = {
 		"displayname varchar not null",
 	],
 	"viewers": [
-		"id serial primary key",
 		"twitchid integer not null references rabbitswatch.users",
 		"uid integer not null",
 		"displayname varchar not null default ''",
 		"tz varchar not null default ''",
 		"notes varchar not null default ''",
+		"primary key (twitchid, uid)",
 	],
 }
 
@@ -61,6 +61,7 @@ def create_tables():
 				# but inserting doesn't - new columns will be added at
 				# the end of the table.
 				want = {c.split()[0]: c for c in columns}
+				want.pop("primary", None) # Ignore a primary key declaration if altering the table
 				have = tables[table]
 				need = [c for c in want if c not in have] # Set operations but preserving order to
 				xtra = [c for c in have if c not in want] # the greatest extent possible.
@@ -76,16 +77,19 @@ def ensure_user(twitchid, username, display):
 			on conflict (twitchid) do update set username=excluded.username,
 			displayname=excluded.displayname""", [twitchid, username, display])
 
-def update_viewer(twitchid, *, uid, display=None, tz=None, notes=None):
+def update_viewer(twitchid, uid, update):
+	if not update: raise ValueError("Gotta update at least one thing") # otherwise it'd bomb in the SQL query
 	with postgres, postgres.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-		cur.execute("insert into rabbitswatch.viewers (twitchid, ...) values (%s, ..) returning *",
-			(twitchid, ...))
-		# TODO: Upsert.
-		ret = cur.fetchone()
-	return ret
+		cur.execute(f"""insert into rabbitswatch.viewers
+			(twitchid, uid, {", ".join(update)})
+			values (%s, %s{", %s" * len(update)})
+			on conflict (twitchid, uid) do update
+			set {", ".join(col + "=excluded." + col for col in update)}
+			returning *""",
+			(twitchid, uid, *update.values()))
+		return cur.fetchone()
 
 def get_viewer(twitchid, uid):
 	with postgres, postgres.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
 		cur.execute("select * from rabbitswatch.viewers where twitchid=%s and uid=%s", (twitchid, uid))
-		ret = cur.fetchall()
-	return ret
+		return cur.fetchall()
