@@ -1,4 +1,4 @@
-import choc, {set_content, DOM} from "https://rosuav.github.io/shed/chocfactory.js";
+import choc, {set_content, DOM, on} from "https://rosuav.github.io/shed/chocfactory.js";
 import "https://cdn.jsdelivr.net/npm/comfy.js/dist/comfy.min.js"; const ComfyJS = window.ComfyJS;
 const {B, BR, BUTTON, LI, SPAN, TEXTAREA} = choc;
 
@@ -24,6 +24,12 @@ function update_time(span) {
 	return set_content(span, tz);
 }
 
+function save_notes() {
+	const li = this.closest("li"); if (!li) return;
+	console.log("Updating notes for", li.querySelector("b").innerText);
+	fetch_json("/update", {uid: li.dataset.id, notes: li.querySelector("textarea").value});
+}
+
 const viewernames = {};
 async function ensure_viewer(uid, displayname) {
 	if (viewernames[uid] === displayname) return;
@@ -39,7 +45,7 @@ async function ensure_viewer(uid, displayname) {
 				update_time(SPAN({"data-tz": user.tz, "data-utcoffset": user.utcoffset})),
 			")", BR(),
 			TEXTAREA({rows: 4, cols: 80}, user.notes), BR(),
-			BUTTON("Save"), //TODO: onclick
+			BUTTON({onclick: save_notes}, "Save"),
 		]));
 
 	} else {
