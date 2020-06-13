@@ -34,6 +34,7 @@ function update_time(span) {
 	}
 	return set_content(span, tz + " - " + tm);
 }
+setInterval(() => document.querySelectorAll("span[data-tz]").forEach(update_time), 10000);
 
 function save_notes() {
 	const li = this.closest("li"); if (!li) return;
