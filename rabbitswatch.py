@@ -1,3 +1,4 @@
+import datetime
 import os
 import sys
 import pytz
@@ -57,10 +58,22 @@ def update():
 	twitchid = session["twitch_user"]["id"]
 	uid = request.json["uid"]
 	update = {col: request.json[col]
-		for col in ("displayname", "tz", "notes")
+		for col in ("displayname", "notes")
 		if col in request.json}
+	if "tz" in request.json:
+		# Validate the timezone name before saving it
+		try:
+			pytz.timezone(request.json["tz"])
+			update["tz"] = request.json["tz"]
+		except pytz.exceptions.UnknownTimeZoneError:
+			# Silently ignore any unknown timezones
+			# Should we return an error and save nothing? Return a warning?
+			pass
 	viewer = database.update_viewer(twitchid, uid, update)
-	# TODO: Add viewer["utcoffset"] if there's a timezone
+	if viewer["tz"]:
+		# Add a UTC offset if there's a timezone
+		now = datetime.datetime.now().astimezone(pytz.timezone(viewer["tz"]))
+		viewer["utcoffset"] = int(now.utcoffset().total_seconds())
 	return jsonify(viewer)
 
 @app.route("/login")
